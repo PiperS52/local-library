@@ -1,6 +1,3 @@
-"""
-Module for the GET fee calculation endpoint
-"""
 from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import List
 from natsort import natsorted
@@ -45,6 +42,7 @@ def get_books(
     books = cursor.fetchall()
 
     books_dicts = [dict(row) for row in books]
+    print('line 45', books_dicts)
 
     response = [
         {
@@ -52,7 +50,8 @@ def get_books(
             "isbn": book["isbn"],
             "authors": book["authors"],
             "publicationYear": book["publication_year"],
-            "title": book["title"]
+            "title": book["title"],
+            "rentalStatus": book["rental_status"] if book["rental_status"] is not None else "available"
         } for book in books_dicts
     ]
     

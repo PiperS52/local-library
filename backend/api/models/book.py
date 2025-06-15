@@ -11,3 +11,4 @@ class Book(CamelModel):
     authors: str
     publication_year: str
     title: str
+    rental_status: str = "available"  # Default value for rental status

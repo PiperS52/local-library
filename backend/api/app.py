@@ -13,6 +13,9 @@ import sqlite3
 from routers.books import (
     get_books,
 )
+from routers.wishlists import (
+    add_book_to_wishlist,
+)
 
 from database.database_service import get_db, DATABASE
 
@@ -30,6 +33,7 @@ BOOKS_CSV = '/app/books.csv'
 app.include_router(get_books.router)
 
 # Wishlists
+app.include_router(add_book_to_wishlist.router)
 
 def seed_books_table(db):
     cursor = db.cursor()
