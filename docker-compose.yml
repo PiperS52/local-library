@@ -1,0 +1,17 @@
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: ./api/Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 128m
+    ports:
+      - '9020:80'
+    volumes:
+      - ./backend/api:/app
+    environment:
+      - LOG_LEVEL=DEBUG
+      - PYTHONUNBUFFERED=1
