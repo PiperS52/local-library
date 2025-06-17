@@ -2,12 +2,13 @@ import os
 import sqlite3
 import tempfile
 import unittest
+from freezegun.api import freeze_time
 from fastapi.testclient import TestClient
 
 from api.app import app  # Adjust if your FastAPI app is elsewhere
 from database.database_service import get_db
 
-class TestUpdateBookRentalStatus(unittest.TestCase):
+class TestGetBooksReport(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create a temporary SQLite database
@@ -37,8 +38,8 @@ class TestUpdateBookRentalStatus(unittest.TestCase):
             )
         ''')
         cursor.execute('''
-            INSERT INTO books (id, isbn, authors, publication_year, title, language, rental_status)
-            VALUES (1, '123', 'Author', '2020', 'Test Book', 'EN', 'available')
+            INSERT INTO books (id, isbn, authors, publication_year, title, language, rental_status, rental_date)
+            VALUES (1, '123', 'Author1', '2020', 'Test Book 1', 'EN', 'borrowed', '2025-06-16'), (2, '234', 'Author2', '2022', 'Test Book 2', 'EN', 'borrowed', '2025-06-13')
         ''')
         cls.connection.commit()
 
@@ -59,20 +60,16 @@ class TestUpdateBookRentalStatus(unittest.TestCase):
         os.close(cls.db_fd)
         os.unlink(cls.db_path)
 
-    def test_update_book_rental_status(self):
-        payload = {"rentalStatus": "borrowed"}
-        response = self.client.patch("/books/1/rental-status", json=payload)
-        self.assertEqual(response.status_code, 204)
-        # Check DB for updated status
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT rental_status FROM books WHERE id=1")
-        status = cursor.fetchone()["rental_status"]
-        self.assertEqual(status, "borrowed")
-
-    def test_update_nonexistent_book(self):
-        payload = {"rentalStatus": "borrowed"}
-        response = self.client.patch("/books/999/rental-status", json=payload)
-        self.assertEqual(response.status_code, 404)
+    @freeze_time("2025-06-16")
+    def test_get_books_with_no_query_params_returns_all_books(self):
+        response = self.client.get("/books-report")
+        self.assertEqual(response.status_code, 200)
+        books = response.json()
+        self.assertEqual(len(books), 2)
+        self.assertEqual(books[0]['title'], 'Test Book 1')
+        self.assertEqual(books[0]['daysBorrowed'], 0)
+        self.assertEqual(books[1]['title'], 'Test Book 2')
+        self.assertEqual(books[1]['daysBorrowed'], 3)
 
 if __name__ == "__main__":
     unittest.main()

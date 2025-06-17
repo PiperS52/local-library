@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from api.app import app  # Adjust if your FastAPI app is elsewhere
 from database.database_service import get_db
 
-class TestUpdateBookRentalStatus(unittest.TestCase):
+class TestGetBooks(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create a temporary SQLite database

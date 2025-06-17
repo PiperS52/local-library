@@ -42,7 +42,6 @@ def get_books(
     books = cursor.fetchall()
 
     books_dicts = [dict(row) for row in books]
-    print('line 45', books_dicts)
 
     response = [
         {

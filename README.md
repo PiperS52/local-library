@@ -1,6 +1,21 @@
 # local-library
 A web app for a local library using Python, SQLite, Docker & React (Vite)
 
+## Running the app
+
+- Building the containers:
+
+```bash
+$ docker-compose up --build -d
+```
+
+- To run the frontend:
+
+```bash
+$ cd ui
+$ yarn install
+$ yarn dev
+```
 
 ## Testing
 
@@ -17,3 +32,7 @@ $ pip3 install -r requirements.txt
 $ cd backend
 $ coverage run -m unittest discover ./api
 ```
+
+## Extensions & considerations
+
+- Given time, further testing & refactoring
