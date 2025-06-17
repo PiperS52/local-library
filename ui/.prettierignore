@@ -1,0 +1,9 @@
+/node_modules
+dist
+yarn.lock
+.env.development
+tsconfig.json
+env.d.ts
+eslint.config.js
+tsconfig.app.json
+tsconfig.node.json

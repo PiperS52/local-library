@@ -26,6 +26,7 @@ def get_wishlists(
     Gets a users wishlists querying user_id
     :param user_id: the id of the user
     """
+    # NOTE: once authentication is implemented, this user_id could be retrieved from the headers following successful login
     if not user_id:
         raise HTTPException(status_code=400, detail="User ID is required")
 
