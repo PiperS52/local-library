@@ -12,9 +12,14 @@ import sqlite3
 
 from routers.books import (
     get_books,
+    update_book_rental_status,
+    get_books_report,
+    update_books_amazon_urls,
 )
 from routers.wishlists import (
     add_book_to_wishlist,
+    delete_book_from_wishlist,
+    get_wishlists,
 )
 
 from database.database_service import get_db, DATABASE
@@ -31,9 +36,14 @@ BOOKS_CSV = '/app/books.csv'
 
 # Books
 app.include_router(get_books.router)
+app.include_router(update_book_rental_status.router)
+app.include_router(get_books_report.router)
+app.include_router(update_books_amazon_urls.router)
 
 # Wishlists
 app.include_router(add_book_to_wishlist.router)
+app.include_router(delete_book_from_wishlist.router)
+app.include_router(get_wishlists.router)
 
 def seed_books_table(db):
     cursor = db.cursor()
@@ -50,6 +60,21 @@ def seed_books_table(db):
             db.commit()
     for row in cursor.execute('SELECT * FROM books'):
         print(row)
+
+def seed_wishlists_table(db):
+    cursor = db.cursor()
+    cursor.execute('SELECT COUNT(*) FROM wishlists')
+    count = cursor.fetchone()[0]
+    if count == 0:
+        try:
+            cursor.execute(
+                "INSERT INTO wishlists (id, user_id, book_id) VALUES (1, 1, 2), (2, 1, 5), (3, 1, 6), (4, 1, 960), (5, 1, 34), (6, 1, 890), (7, 1, 1934)"
+            )
+            db.commit()
+        except sqlite3.IntegrityError as e:
+            print("Some wishlist entries already exist, skipping insertion.", e)
+        for row in cursor.execute('SELECT * FROM wishlists'):
+            print(row)
 
 @app.on_event("startup")
 async def startup():
@@ -80,6 +105,7 @@ async def startup():
         ''')
         # Seed data if needed
         seed_books_table(app.state.db)
+        seed_wishlists_table(app.state.db)
 
 @app.on_event("shutdown")
 async def shutdown():
