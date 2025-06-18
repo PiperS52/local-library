@@ -4,10 +4,10 @@ import tempfile
 import unittest
 from fastapi.testclient import TestClient
 
-from api.app import app 
+from api.app import app
 from database.database_service import get_db
 
-class TestUpdateBookRentalStatus(unittest.TestCase):
+class TestUpdateBooksAmazonUrls(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create a temporary SQLite database
@@ -37,8 +37,8 @@ class TestUpdateBookRentalStatus(unittest.TestCase):
             )
         ''')
         cursor.execute('''
-            INSERT INTO books (id, isbn, authors, publication_year, title, language, rental_status)
-            VALUES (1, '123', 'Author', '2020', 'Test Book', 'EN', 'available')
+            INSERT INTO books (id, isbn, authors, publication_year, title, language, rental_status, rental_date, amazon_url)
+            VALUES (1, '123', 'Author', '2020', 'Test Book', 'EN', 'available', '2025-06-16', 'https://amazon.com/test-book-1')
         ''')
         cls.connection.commit()
 
@@ -59,20 +59,20 @@ class TestUpdateBookRentalStatus(unittest.TestCase):
         os.close(cls.db_fd)
         os.unlink(cls.db_path)
 
-    def test_update_book_rental_status(self):
-        payload = {"rentalStatus": "borrowed"}
-        response = self.client.patch("/books/1/rental-status", json=payload)
+    def test_update_books_amazon_urls_successfully_updates_relevant_books(self):
+        payload = {"books": [{"id": 1, "amazonUrl": "https://amazon.com/updated-test-book-1"}]}
+        response = self.client.patch("/books", json=payload)
         self.assertEqual(response.status_code, 204)
         # Check DB for updated status
         cursor = self.connection.cursor()
-        cursor.execute("SELECT rental_status FROM books WHERE id=1")
-        status = cursor.fetchone()["rental_status"]
-        self.assertEqual(status, "borrowed")
+        cursor.execute("SELECT amazon_url FROM books WHERE id=1")
+        updated_book_amazon_url = cursor.fetchone()["amazon_url"]
+        self.assertEqual(updated_book_amazon_url, "https://amazon.com/updated-test-book-1")
 
-    def test_update_nonexistent_book(self):
-        payload = {"rentalStatus": "borrowed"}
-        response = self.client.patch("/books/999/rental-status", json=payload)
-        self.assertEqual(response.status_code, 404)
+    def test_update_books_amazon_urls_returns_400_error_when_invalid_request_body(self):
+        payload = {"books": [{"invalid": "invalid", "amazonUrl": "https://amazon.com/updated-test-book-1"}]}
+        response = self.client.patch("/books", json=payload)
+        self.assertEqual(response.status_code, 400)
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,7 +5,7 @@ import unittest
 from freezegun.api import freeze_time
 from fastapi.testclient import TestClient
 
-from api.app import app  # Adjust if your FastAPI app is elsewhere
+from api.app import app
 from database.database_service import get_db
 
 class TestGetBooksReport(unittest.TestCase):
